@@ -1,37 +1,29 @@
-## Welcome to GitHub Pages
+# 谭睿翔(RuixiangTan)
 
-You can use the [editor on GitHub](https://github.com/tanruixiang/tanruixiang.GitHub.io/edit/main/index.md) to maintain and preview the content for your website in Markdown files.
+## Contact Me
+Email:819464715 AT qq.com / tanruixiang0104 AT gmail.com
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+Linkedin:https://www.linkedin.com/in/%E7%9D%BF%E7%BF%94-%E8%B0%AD-8b58111a0/
 
-### Markdown
+QQ:819464715
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+## Education
+Changchun University of Science and Technology
 
-```markdown
-Syntax highlighted code block
+Computer science and technology         2017.09-2021.06   
 
-# Header 1
-## Header 2
-### Header 3
+## Experience
+### TENCENT TECHNOLOGY(SHENZHEN)COMPANY LIMITED
 
-- Bulleted
-- List
+**Back End Developer Intern** - Development of **distributed database** 2020.07-2021.03 
 
-1. Numbered
-2. List
+## Competition Award
+ACM-ICPC Asia **Shenyang** Regional Contest **Sliver Medal**
 
-**Bold** and _Italic_ and `Code` text
+ACM-ICPC China **Nanchang** National Invitational and International Silk-Road Programming Contest **Sliver Medal**
 
-[Link](url) and ![Image](src)
-```
+ACM-ICPC’s And CCPC's **Many Bronze Medals** 
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+Group Programming Ladder Tournament **Gold Medal**
 
-### Jekyll Themes
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/tanruixiang/tanruixiang.GitHub.io/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
