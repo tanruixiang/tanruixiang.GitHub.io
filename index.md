@@ -8,9 +8,12 @@ Linkedin:https://www.linkedin.com/in/%E7%9D%BF%E7%BF%94-%E8%B0%AD-8b58111a0/
 QQ:819464715
 
 ## Education
-Changchun University of Science and Technology
+**Zhejiang University**
 
-Computer science and technology         2017.09-2021.06   
+Computer Software Engineering
+**Changchun University of Science and Technology**
+
+Computer Science and Technology         2021.09-   
 
 ## Experience
 ### TENCENT TECHNOLOGY(SHENZHEN)COMPANY LIMITED
