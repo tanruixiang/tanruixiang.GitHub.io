@@ -10,11 +10,11 @@ QQ:819464715
 ## Education
 **Zhejiang University**
 
-Computer Software Engineering 
+Computer Software Engineering           2021.09-
 
 **Changchun University of Science and Technology**
 
-Computer Science and Technology         2021.09-   
+Computer Science and Technology         2017.09-2021.06
 
 ## Experience
 ### TENCENT TECHNOLOGY(SHENZHEN)COMPANY LIMITED
