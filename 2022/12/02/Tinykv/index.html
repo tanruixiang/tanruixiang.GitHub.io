@@ -348,7 +348,7 @@
 <p>总体难度3&gt;2&gt;4&gt;1。2,3都有随机测试，不好复现，再加上要熟悉tinykv这套代码(应该是从tikv扒下来的)，调用链比较长，所以难度比较大，这里建议多参考别人的文章或者博客。其他都是线性测试，单步就能搞定。</p>
 <h2 id="Lab1"><a href="#Lab1" class="headerlink" title="Lab1"></a>Lab1</h2><p>Lab1就是个热身，根据文档调badger包即可，这里没什么可讲的。badger包底层用的是LSM-Tree，没接触过的可以了解一下，看过<code>levelDB</code>或者是<code>RocksDB</code>的调包通过即可。</p>
 <h2 id="Lab2"><a href="#Lab2" class="headerlink" title="Lab2"></a>Lab2</h2><p>Lab2就进入实现raft的阶段了，和6.824不同的是，6.824比较自由，接口什么的都是自己定，并且需要自己加锁防止race。而tinykv的raft接口设定是参照etcd设计的，不需要加锁。</p>
-<h3 id="lab2a"><a href="#lab2a" class="headerlink" title="lab2a"></a>lab2a</h3><p>lab2a就是实现基本的raft操作，这里的测试都是线性的，并且基本和etcd的一模一样，强烈建议直接参考etcd来写。etcd除了多了一点优化和Message的名字不一样以外，其他几乎一模一样。这里强烈建议参考<a target="_blank" rel="noopener" href="https://www.codedump.info/post/20180922-etcd-raft/%EF%BC%8C%E8%BF%99%E7%AF%87%E6%96%87%E4%BB%B6%E9%87%8C%E4%B9%9F%E6%9C%89%E5%B8%A6%E6%B3%A8%E9%87%8A%E7%9A%84etcd%E4%BB%A3%E7%A0%81%EF%BC%8C%E7%9B%B4%E6%8E%A5%E6%89%92%E4%B8%8B%E6%9D%A5%E4%B8%A2%E5%88%B0tinykv%E4%B8%8A%E5%8D%B3%E5%8F%AF%E3%80%82">https://www.codedump.info/post/20180922-etcd-raft/，这篇文件里也有带注释的etcd代码，直接扒下来丢到tinykv上即可。</a></p>
+<h3 id="lab2a"><a href="#lab2a" class="headerlink" title="lab2a"></a>lab2a</h3><p>lab2a就是实现基本的raft操作，这里的测试都是线性的，并且基本和etcd的一模一样，强烈建议直接参考etcd来写。etcd除了多了一点优化和Message的名字不一样以外，其他几乎一模一样。这里强烈建议参考<a target="_blank" rel="noopener" href="https://www.codedump.info/post/20180922-etcd-raft/%EF%BC%8C%E8%BF%99%E7%AF%87%E6%96%87%E4%BB%B6%E9%87%8C%E4%B9%9F%E6%9C%89%E5%B8%A6%E6%B3%A8%E9%87%8A%E7%9A%84etcd%E4%BB%A3%E7%A0%81%E3%80%82">https://www.codedump.info/post/20180922-etcd-raft/，这篇文件里也有带注释的etcd代码。</a></p>
 <p>在这一节中，我们需要实现大部分raft模块的接口，代码量还是比较大的。一共有三个模块<code>RawNode</code>,<code>Raft</code>,<code>RaftLog</code>。这三个模块的定义和etcd一致。</p>
 <ul>
 <li><code>RawNode</code>:充当上层模块和raft模块交互的中间层，传递上层模块的信息给raft，比如各种各样的Msg。同时把raft的信息传递给上层模块,主要是各种日志的同步状态，比如向上传递已经同步可以apply的日志项。</li>
@@ -648,7 +648,11 @@
 <li>删除entries,更新<code>committed stabled applied</code>等元数据。并且设置<code>l.pendingSnapshot = s</code>。</li>
 <li>ready会把l.pendingSnapshot送给<code>HandleRaftReady</code>，用到上面提到的<code>d.peerStorage.SaveReadyState</code>来更新<code>raftState</code>和<code>applyState</code>。并且保存snapshot中的相关数据，这里是通过生成一个<code>RegionTaskApply</code>的task实现的。保存成功后，需要把各个state和region持久化。</li>
 </ol>
-<h2 id="lab3"><a href="#lab3" class="headerlink" title="lab3"></a>lab3</h2><h3 id="lab3a"><a href="#lab3a" class="headerlink" title="lab3a"></a>lab3a</h3><p>3a是给raft加上leaderTransfer和配置更改功能。因为都是线性测试，再加上配置变更都是以一个节点为单位的，和raft原文不同，所以比较简单。<br>leaderTransfer具体流程如下所示：</p>
+<h4 id="Raft的一些优化"><a href="#Raft的一些优化" class="headerlink" title="Raft的一些优化"></a>Raft的一些优化</h4><p>由于之后的Lab都是基于我们目前实现的Raft模块，所以除了要保证Raft的正确性外，还需要保证Raft的效率，不然在后面的Lab中可能会碰见<code>Time out</code>问题。这里列举几个比较容易实现的优化。</p>
+<h5 id="PreVote"><a href="#PreVote" class="headerlink" title="PreVote"></a>PreVote</h5><p>考虑这样一种情况，原始论文中的选举，每次都会把<code>term+1</code>。当出现网络隔离后，部分节点会出现不停超时选举的情况，导致<code>term</code>巨大。网络隔离消失后，如果原集群没有增加日志，那么就会由于term巨大触发新一轮选举，浪费资源。</p>
+<p>以上的根本原因就是每次选择都会把自身的<code>term+1</code>，并且网络隔离状态下永远不可能获得大多数票数成为Leader。这个时候就可以在正式选举之前引入一个<code>PreVote</code>机制，<code>PreVote</code>除了不会更新投票节点的投票状态以外，其他和<code>RequestVote</code>一模一样，只有<code>PreVote</code>得到的票数符合条件时，才会执行<code>RequestVote</code>。</p>
+<h5 id="ReadIndex"><a href="#ReadIndex" class="headerlink" title="ReadIndex"></a>ReadIndex</h5><p>对于读请求，只要确保在某次写请求之后，就可以安全地返回，而没有必要每次都走Leader才能获取值。也就是说，客户端会携带一个index，只要我们的状态机已经apply的index位于这个客户端之后，那么就可以安全地返回。</p>
+<h5 id="ReadIndex-1"><a href="#ReadIndex-1" class="headerlink" title="ReadIndex"></a>ReadIndex</h5><h2 id="lab3"><a href="#lab3" class="headerlink" title="lab3"></a>lab3</h2><h3 id="lab3a"><a href="#lab3a" class="headerlink" title="lab3a"></a>lab3a</h3><p>3a是给raft加上leaderTransfer和配置更改功能。因为都是线性测试，再加上配置变更都是以一个节点为单位的，和raft原文不同，所以比较简单。<br>leaderTransfer具体流程如下所示：</p>
 <ol>
 <li>上层收到<code>AdminCmdType_TransferLeader</code>,调用<code>d.RaftGroup.TransferLeader() </code>发送<code>MsgTransferLeader</code>给raft（3B中需要实现）</li>
 <li>收到<code>leaderTransfer</code>后，会把<code>r.leadTransferee </code>设置为需要转移的节点(需要保证当前节点是leader,并且设置后需要拒绝后续的所有proposal)。</li>
@@ -705,7 +709,101 @@ CheckKeyInRegion<span aria-hidden="true" class="line-numbers-rows"><span></span>
 <li>值不匹配问题：由于我一开始就做了<code>batch write</code>的优化，导致整个写入流程有点乱。这里建议一开始就采用一条一条写入数据库的方法，先把测试用例过了，如果再出现超时的问题再用<code>batch write</code>的优化。</li>
 <li>apply的时候记得检查<code>CheckRegionEpoch</code>,<code>CheckKeyInRegion</code>。</li>
 </ol>
-<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://www.codedump.info/post/20180922-etcd-raft/">https://www.codedump.info/post/20180922-etcd-raft/</a><br><a target="_blank" rel="noopener" href="https://github.com/Smith-Cruise/TinyKV-White-Paper">https://github.com/Smith-Cruise/TinyKV-White-Paper</a><br><a target="_blank" rel="noopener" href="https://github.com/sakura-ysy/TinyKV-2022-doc">https://github.com/sakura-ysy/TinyKV-2022-doc</a><br><a target="_blank" rel="noopener" href="https://cn.pingcap.com/blog/the-design-and-implementation-of-multi-raft#raftstore">https://cn.pingcap.com/blog/the-design-and-implementation-of-multi-raft#raftstore</a><br><a target="_blank" rel="noopener" href="https://tanxinyu.work/tinykv/">https://tanxinyu.work/tinykv/</a><br><a target="_blank" rel="noopener" href="https://asktug.com/t/topic/273859">https://asktug.com/t/topic/273859</a></p>
+<h2 id="Lab4"><a href="#Lab4" class="headerlink" title="Lab4"></a>Lab4</h2><p>这一节是实现Percolator的相关操作，<code>Percolator</code>原论文有个伪代码图，主要是参考那一块实现。</p>
+<h2 id="Lab4a"><a href="#Lab4a" class="headerlink" title="Lab4a"></a>Lab4a</h2><p>这里实现的是从3个cf中取得对应值的接口。</p>
+<h3 id="PutWrite"><a href="#PutWrite" class="headerlink" title="PutWrite"></a>PutWrite</h3><p>把传入参数的<code>key</code>和<code>timestamp</code>编码成Key，把传入的<code>write</code>编码成value，写入到<code>CfWrite</code>中。</p>
+<h3 id="GetLock"><a href="#GetLock" class="headerlink" title="GetLock"></a>GetLock</h3><p>从<code>CfLock</code>中获取<code>key</code>的锁信息，包括<code>Primary, Ts, Ttl, Kind</code>。</p>
+<h3 id="PutLock"><a href="#PutLock" class="headerlink" title="PutLock"></a>PutLock</h3><p>把传入的<code>lock</code>编码成value，写入到<code>CfLock</code>中。</p>
+<h3 id="DeleteLock"><a href="#DeleteLock" class="headerlink" title="DeleteLock"></a>DeleteLock</h3><p>删除<code>CfLock</code>中的<code>key</code>所对应的锁</p>
+<h3 id="PutValue"><a href="#PutValue" class="headerlink" title="PutValue"></a>PutValue</h3><p>把传入参数的<code>key</code>和<code>txn.StartTS</code>编码成Key，写入到<code>CfDefault</code>中。</p>
+<h3 id="DeleteValue"><a href="#DeleteValue" class="headerlink" title="DeleteValue"></a>DeleteValue</h3><p>把传入参数的<code>key</code>和<code>txn.StartTS</code>编码成Key，在<code>CfDefault</code>中删除</p>
+<h3 id="CurrentWrite"><a href="#CurrentWrite" class="headerlink" title="CurrentWrite"></a>CurrentWrite</h3><p>这里需要找到本事务对<code>key</code>在<code>CfWrite</code>中的<code>write</code>。<br>这里需要知道的是，<code>Reader</code>的迭代器是按照key升序时间戳降序的，也就是最大的时间戳实际上在比较大小的条件下是最小的，和<code>leveldb</code>是类似的。所以我们可以直接以最大时间戳进行<code>seek</code>。然后迭代寻找是否有本事务的<code>write</code>。</p>
+<h3 id="MostRecentWrite"><a href="#MostRecentWrite" class="headerlink" title="MostRecentWrite"></a>MostRecentWrite</h3><p>该接口要找的是对应key的最新的write。所以我们可以直接以最大时间戳进行<code>seek</code>判断一下是否是这个key的write即可。</p>
+<h3 id="GetValue"><a href="#GetValue" class="headerlink" title="GetValue"></a>GetValue</h3><p>这里最复杂的就是该接口。一共有两个过程。</p>
+<ul>
+<li>把请求的<code>key</code>和<code>txn.StartTS</code>编码，从<code>Cfwrite</code>中使用<code>seek</code>找到(此时找到是(key,commitTs)，一定是已经提交的并且比当前事务的StartTS小)对应的<code>write</code></li>
+<li>用刚刚找到的<code>write</code>中的<code>StartTS</code>和当前的<code>key</code>组成值去<code>CfDefault</code>中取得对应的值</li>
+</ul>
+<h2 id="Lab4b"><a href="#Lab4b" class="headerlink" title="Lab4b"></a>Lab4b</h2><h3 id="Get"><a href="#Get" class="headerlink" title="Get"></a>Get</h3><p>Get接口流程如下:</p>
+<ul>
+<li>使用<code>request</code>中有关<code>region</code>的元数据创建对应的<code>Reader</code></li>
+<li>对<code>request</code>请求的key加锁</li>
+<li>根据<code>request</code>中附带的之前客户端向<code>TSO</code>请求的时间戳创建对应的事务</li>
+<li>使用<code>txn.GetLock</code>获取请求的<code>Key</code>中的锁，如果此时有锁比事务的时间戳小，那么立即abort</li>
+<li>调用<code>txn.GetValue</code>获取值，根据值是否存在设置相关的回复字段<br>以上过程还涉及<code>region</code>的判断，值是否存在的判断，以及最后的锁释放,<code>reader</code>关闭。</li>
+</ul>
+<h3 id="PreWrite"><a href="#PreWrite" class="headerlink" title="PreWrite"></a>PreWrite</h3><p>PreWrite接口流程如下:</p>
+<ul>
+<li>使用<code>request</code>中有关<code>region</code>的元数据创建对应的<code>Reader</code></li>
+<li>根据<code>request</code>中附带的之前客户端向<code>TSO</code>请求的时间戳创建对应的事务</li>
+<li>使用<code>req.Mutations</code>中包含了所以需要<code>prewrite</code>的<code>key</code>，对于每个<code>key</code>取最新的<code>write</code></li>
+<li>如果存在<code>commit时间戳</code>大于该事务的<code>write</code>,那么就直接abort</li>
+<li>获取<code>lock</code>中对应key的<code>lock</code>，如果不是这个事务的<code>lock</code>，那么直接abort</li>
+<li>执行对应的<code>del</code>或<code>put</code>操作，使用<code>txn.DeleteValue/txn.PutValue</code>把值写入到<code>defalut</code>中，以及<code>txn.PutLock</code>写入到<code>write</code>中</li>
+<li>最后调用<code>server.storage.Write</code>把刚刚的<code>batch</code>进行实际的写入</li>
+</ul>
+<h3 id="Commit"><a href="#Commit" class="headerlink" title="Commit"></a>Commit</h3><p>Commit接口流程如下:</p>
+<ul>
+<li>使用<code>request</code>中有关<code>region</code>的元数据创建对应的<code>Reader</code></li>
+<li>对<code>request</code>请求的Keys加锁</li>
+<li>对于请求中需要提交的<code>key</code>,查询<code>lock</code>中该事务之前<code>prewrite</code>的锁是否存在，如果不存在abort</li>
+<li>对于每个key,使用<code>txn.PutWrite</code>把对应用事务的<code>commit时间戳</code>和<code>起始时间戳</code>初始化的<code>write</code>写入</li>
+<li>删除对应<code>key</code>的Lock</li>
+<li>最后调用<code>server.storage.Write</code>把刚刚的<code>batch</code>进行实际的写入</li>
+</ul>
+<h2 id="Lab4c"><a href="#Lab4c" class="headerlink" title="Lab4c"></a>Lab4c</h2><p>这里是实现在2pc的时候需要查询状态或者处理遗留信息等的一些操作,和<code>Tikv</code>一致。</p>
+<h3 id="KvScan"><a href="#KvScan" class="headerlink" title="KvScan"></a>KvScan</h3><p>KvScan就是从<code>startKey</code>开始遍历，我们主要需要实现一个<code>Scanner</code>。流程如下：</p>
+<ul>
+<li>创建基于<code>CfWrite</code>的<code>iterator</code>。</li>
+<li><code>seek</code>到<code>startKey</code>。</li>
+<li>开始使用<code>iterator</code>遍历。每次遍历到新的<code>key</code>的时候，需要把<code>key</code>decode成<code>userKey</code>和<code>ts</code>。</li>
+<li>判断<code>userKey</code>是否和上一个我们取用的<code>userKey</code>相同，以及<code>ts</code>是否小于当前事务的时间戳</li>
+<li>如果以上条件满足，则成功取到一个新的<code>k-v pairs</code></li>
+<li>在<code>KvScan</code>上层需要判断<code>value</code>是否为空，因为可能是删除或者<code>rollback</code>的write。</li>
+</ul>
+<h3 id="KvCheckTxnStatus"><a href="#KvCheckTxnStatus" class="headerlink" title="KvCheckTxnStatus"></a>KvCheckTxnStatus</h3><p>检查事务状态用的，根据此处检查的状态，判断<code>percolator</code>的进度，流程如下:</p>
+<ul>
+<li>获取<code>PrimaryKey</code>的<code>write</code></li>
+<li>如果<code>write</code>存在，有以下两种情况<ul>
+<li><code>write</code>的种类为<code>WriteKindRollback</code>那么设置<code>CommitVersion</code>为0并且返回，表示事务已经回滚了</li>
+<li>否则设置<code>CommitVersion</code>为<code>key</code>的<code>ts</code>(即write提交时间戳)，表示事务已经成功执行。</li>
+</ul>
+</li>
+<li>如果<code>write</code>不存在，则从<code>CfLock</code>中查找<code>PrimeKey</code>的<code>Lock</code>。<ul>
+<li>如果lock不存在，说明此时没有prewrite，直接写入<code>WriteKindRollback</code>的<code>write</code>，并且设置<code>Action_LockNotExistRollback</code>(lock过期就会导致这种情况)</li>
+<li>如果lock存在，需要判断lock的生存时间，如果已经过期了，那么删除<code>Cflock</code>和<code>CfDefault</code>,并且写入与上相同的回滚记录</li>
+</ul>
+</li>
+</ul>
+<h3 id="KvBatchRollback"><a href="#KvBatchRollback" class="headerlink" title="KvBatchRollback"></a>KvBatchRollback</h3><p>Helper函数，用于事务的回滚。流程如下:</p>
+<ul>
+<li>遍历所有需要回滚的key，对于每个key操作</li>
+<li>获取该key的<code>write</code>，如果<code>write</code>不为空<ul>
+<li>如果该<code>write</code>是回滚lock，说明已经回滚完成了，操作下一个<code>key</code>即可</li>
+<li>否则无法回滚，因为已经有写入记录了，说明此时<code>percolator</code>只能<code>forward</code></li>
+</ul>
+</li>
+<li>获取该key的<code>lock</code><ul>
+<li>如果lock为空，说明可以直接写入回滚记录(可能过期被清除了)</li>
+<li>如果不为空，判断该lock的时间戳是否是该事务的时间戳<ul>
+<li>如果是，删除<code>lock</code>和<code>value</code>，写入回滚记录即可</li>
+<li>如果不是，只需要把回滚记录写入<code>write</code>，因为此时不存在和该事务匹配的lock并且也没有write，说明这是个不存在事务，回滚执行空操作即可</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="KvResolveLock"><a href="#KvResolveLock" class="headerlink" title="KvResolveLock"></a>KvResolveLock</h3><p><code>percolator</code>执行过程中<code>failed</code>掉时，<code>lock</code>会被留下，由于<code>percolator</code>的锁会阻塞其他事务，所以这些锁并且被清理。<br>和<code>percolator</code>论文的伪代码不同，<code>tikv</code>会使用<code>lazy</code>的方式以及<code>GC</code>的方式处理遗留的锁。也就是如果碰到被锁阻塞，可能会使用<code>KvResolveLock</code>,（当然<code>Tinykv</code>需要实现<code>lazy</code>的锁清理方式)。同时<code>GC</code>可能会调用该函数动态清理。流程如下：</p>
+<ul>
+<li>在<code>CfLock</code>上创建迭代器，并且迭代处理<code>lock</code></li>
+<li>对于每个lock，如果解析得到<code>ts</code>是当前事务的ts，那么就加入到<code>Keys</code>中</li>
+<li>注意执行<code>KvResolveLock</code>之前会执行<code>KvCheckTxnStatus</code>，并且把请求发给<code>KvResolveLock</code>处理。<ul>
+<li>如果此时发送过来的请求<code>CommitVersion</code>是0，表示<code>percolator</code>需要回滚，那么调用<code>KvBatchRollback</code>批量回滚这些锁</li>
+<li>如果不是0，表示<code>percolator</code>需要<code>forward</code>，此时需要调用<code>KvCommit</code>执行<code>2PC</code>的第二个阶段</li>
+</ul>
+</li>
+</ul>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://www.codedump.info/post/20180922-etcd-raft/">https://www.codedump.info/post/20180922-etcd-raft/</a><br><a target="_blank" rel="noopener" href="https://github.com/Smith-Cruise/TinyKV-White-Paper">https://github.com/Smith-Cruise/TinyKV-White-Paper</a><br><a target="_blank" rel="noopener" href="https://github.com/sakura-ysy/TinyKV-2022-doc">https://github.com/sakura-ysy/TinyKV-2022-doc</a><br><a target="_blank" rel="noopener" href="https://cn.pingcap.com/blog/the-design-and-implementation-of-multi-raft#raftstore">https://cn.pingcap.com/blog/the-design-and-implementation-of-multi-raft#raftstore</a><br><a target="_blank" rel="noopener" href="https://tanxinyu.work/tinykv/">https://tanxinyu.work/tinykv/</a><br><a target="_blank" rel="noopener" href="https://asktug.com/t/topic/273859">https://asktug.com/t/topic/273859</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/149377959">https://zhuanlan.zhihu.com/p/149377959</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/438064192">https://zhuanlan.zhihu.com/p/438064192</a></p>
 
                 
             </div>
