@@ -710,21 +710,21 @@ CheckKeyInRegion<span aria-hidden="true" class="line-numbers-rows"><span></span>
 <li>apply的时候记得检查<code>CheckRegionEpoch</code>,<code>CheckKeyInRegion</code>。</li>
 </ol>
 <h2 id="Lab4"><a href="#Lab4" class="headerlink" title="Lab4"></a>Lab4</h2><p>这一节是实现Percolator的相关操作，<code>Percolator</code>原论文有个伪代码图，主要是参考那一块实现。</p>
-<h2 id="Lab4a"><a href="#Lab4a" class="headerlink" title="Lab4a"></a>Lab4a</h2><p>这里实现的是从3个cf中取得对应值的接口。</p>
-<h3 id="PutWrite"><a href="#PutWrite" class="headerlink" title="PutWrite"></a>PutWrite</h3><p>把传入参数的<code>key</code>和<code>timestamp</code>编码成Key，把传入的<code>write</code>编码成value，写入到<code>CfWrite</code>中。</p>
-<h3 id="GetLock"><a href="#GetLock" class="headerlink" title="GetLock"></a>GetLock</h3><p>从<code>CfLock</code>中获取<code>key</code>的锁信息，包括<code>Primary, Ts, Ttl, Kind</code>。</p>
-<h3 id="PutLock"><a href="#PutLock" class="headerlink" title="PutLock"></a>PutLock</h3><p>把传入的<code>lock</code>编码成value，写入到<code>CfLock</code>中。</p>
-<h3 id="DeleteLock"><a href="#DeleteLock" class="headerlink" title="DeleteLock"></a>DeleteLock</h3><p>删除<code>CfLock</code>中的<code>key</code>所对应的锁</p>
-<h3 id="PutValue"><a href="#PutValue" class="headerlink" title="PutValue"></a>PutValue</h3><p>把传入参数的<code>key</code>和<code>txn.StartTS</code>编码成Key，写入到<code>CfDefault</code>中。</p>
-<h3 id="DeleteValue"><a href="#DeleteValue" class="headerlink" title="DeleteValue"></a>DeleteValue</h3><p>把传入参数的<code>key</code>和<code>txn.StartTS</code>编码成Key，在<code>CfDefault</code>中删除</p>
-<h3 id="CurrentWrite"><a href="#CurrentWrite" class="headerlink" title="CurrentWrite"></a>CurrentWrite</h3><p>这里需要找到本事务对<code>key</code>在<code>CfWrite</code>中的<code>write</code>。<br>这里需要知道的是，<code>Reader</code>的迭代器是按照key升序时间戳降序的，也就是最大的时间戳实际上在比较大小的条件下是最小的，和<code>leveldb</code>是类似的。所以我们可以直接以最大时间戳进行<code>seek</code>。然后迭代寻找是否有本事务的<code>write</code>。</p>
-<h3 id="MostRecentWrite"><a href="#MostRecentWrite" class="headerlink" title="MostRecentWrite"></a>MostRecentWrite</h3><p>该接口要找的是对应key的最新的write。所以我们可以直接以最大时间戳进行<code>seek</code>判断一下是否是这个key的write即可。</p>
-<h3 id="GetValue"><a href="#GetValue" class="headerlink" title="GetValue"></a>GetValue</h3><p>这里最复杂的就是该接口。一共有两个过程。</p>
+<h3 id="Lab4a"><a href="#Lab4a" class="headerlink" title="Lab4a"></a>Lab4a</h3><p>这里实现的是从3个cf中取得对应值的接口。</p>
+<h4 id="PutWrite"><a href="#PutWrite" class="headerlink" title="PutWrite"></a>PutWrite</h4><p>把传入参数的<code>key</code>和<code>timestamp</code>编码成Key，把传入的<code>write</code>编码成value，写入到<code>CfWrite</code>中。</p>
+<h4 id="GetLock"><a href="#GetLock" class="headerlink" title="GetLock"></a>GetLock</h4><p>从<code>CfLock</code>中获取<code>key</code>的锁信息，包括<code>Primary, Ts, Ttl, Kind</code>。</p>
+<h4 id="PutLock"><a href="#PutLock" class="headerlink" title="PutLock"></a>PutLock</h4><p>把传入的<code>lock</code>编码成value，写入到<code>CfLock</code>中。</p>
+<h4 id="DeleteLock"><a href="#DeleteLock" class="headerlink" title="DeleteLock"></a>DeleteLock</h4><p>删除<code>CfLock</code>中的<code>key</code>所对应的锁</p>
+<h4 id="PutValue"><a href="#PutValue" class="headerlink" title="PutValue"></a>PutValue</h4><p>把传入参数的<code>key</code>和<code>txn.StartTS</code>编码成Key，写入到<code>CfDefault</code>中。</p>
+<h4 id="DeleteValue"><a href="#DeleteValue" class="headerlink" title="DeleteValue"></a>DeleteValue</h4><p>把传入参数的<code>key</code>和<code>txn.StartTS</code>编码成Key，在<code>CfDefault</code>中删除</p>
+<h4 id="CurrentWrite"><a href="#CurrentWrite" class="headerlink" title="CurrentWrite"></a>CurrentWrite</h4><p>这里需要找到本事务对<code>key</code>在<code>CfWrite</code>中的<code>write</code>。<br>这里需要知道的是，<code>Reader</code>的迭代器是按照key升序时间戳降序的，也就是最大的时间戳实际上在比较大小的条件下是最小的，和<code>leveldb</code>是类似的。所以我们可以直接以最大时间戳进行<code>seek</code>。然后迭代寻找是否有本事务的<code>write</code>。</p>
+<h4 id="MostRecentWrite"><a href="#MostRecentWrite" class="headerlink" title="MostRecentWrite"></a>MostRecentWrite</h4><p>该接口要找的是对应key的最新的write。所以我们可以直接以最大时间戳进行<code>seek</code>判断一下是否是这个key的write即可。</p>
+<h4 id="GetValue"><a href="#GetValue" class="headerlink" title="GetValue"></a>GetValue</h4><p>这里最复杂的就是该接口。一共有两个过程。</p>
 <ul>
 <li>把请求的<code>key</code>和<code>txn.StartTS</code>编码，从<code>Cfwrite</code>中使用<code>seek</code>找到(此时找到是(key,commitTs)，一定是已经提交的并且比当前事务的StartTS小)对应的<code>write</code></li>
 <li>用刚刚找到的<code>write</code>中的<code>StartTS</code>和当前的<code>key</code>组成值去<code>CfDefault</code>中取得对应的值</li>
 </ul>
-<h2 id="Lab4b"><a href="#Lab4b" class="headerlink" title="Lab4b"></a>Lab4b</h2><h3 id="Get"><a href="#Get" class="headerlink" title="Get"></a>Get</h3><p>Get接口流程如下:</p>
+<h3 id="Lab4b"><a href="#Lab4b" class="headerlink" title="Lab4b"></a>Lab4b</h3><h4 id="Get"><a href="#Get" class="headerlink" title="Get"></a>Get</h4><p>Get接口流程如下:</p>
 <ul>
 <li>使用<code>request</code>中有关<code>region</code>的元数据创建对应的<code>Reader</code></li>
 <li>对<code>request</code>请求的key加锁</li>
@@ -732,7 +732,7 @@ CheckKeyInRegion<span aria-hidden="true" class="line-numbers-rows"><span></span>
 <li>使用<code>txn.GetLock</code>获取请求的<code>Key</code>中的锁，如果此时有锁比事务的时间戳小，那么立即abort</li>
 <li>调用<code>txn.GetValue</code>获取值，根据值是否存在设置相关的回复字段<br>以上过程还涉及<code>region</code>的判断，值是否存在的判断，以及最后的锁释放,<code>reader</code>关闭。</li>
 </ul>
-<h3 id="PreWrite"><a href="#PreWrite" class="headerlink" title="PreWrite"></a>PreWrite</h3><p>PreWrite接口流程如下:</p>
+<h4 id="PreWrite"><a href="#PreWrite" class="headerlink" title="PreWrite"></a>PreWrite</h4><p>PreWrite接口流程如下:</p>
 <ul>
 <li>使用<code>request</code>中有关<code>region</code>的元数据创建对应的<code>Reader</code></li>
 <li>根据<code>request</code>中附带的之前客户端向<code>TSO</code>请求的时间戳创建对应的事务</li>
@@ -742,7 +742,7 @@ CheckKeyInRegion<span aria-hidden="true" class="line-numbers-rows"><span></span>
 <li>执行对应的<code>del</code>或<code>put</code>操作，使用<code>txn.DeleteValue/txn.PutValue</code>把值写入到<code>defalut</code>中，以及<code>txn.PutLock</code>写入到<code>write</code>中</li>
 <li>最后调用<code>server.storage.Write</code>把刚刚的<code>batch</code>进行实际的写入</li>
 </ul>
-<h3 id="Commit"><a href="#Commit" class="headerlink" title="Commit"></a>Commit</h3><p>Commit接口流程如下:</p>
+<h4 id="Commit"><a href="#Commit" class="headerlink" title="Commit"></a>Commit</h4><p>Commit接口流程如下:</p>
 <ul>
 <li>使用<code>request</code>中有关<code>region</code>的元数据创建对应的<code>Reader</code></li>
 <li>对<code>request</code>请求的Keys加锁</li>
@@ -751,8 +751,8 @@ CheckKeyInRegion<span aria-hidden="true" class="line-numbers-rows"><span></span>
 <li>删除对应<code>key</code>的Lock</li>
 <li>最后调用<code>server.storage.Write</code>把刚刚的<code>batch</code>进行实际的写入</li>
 </ul>
-<h2 id="Lab4c"><a href="#Lab4c" class="headerlink" title="Lab4c"></a>Lab4c</h2><p>这里是实现在2pc的时候需要查询状态或者处理遗留信息等的一些操作,和<code>Tikv</code>一致。</p>
-<h3 id="KvScan"><a href="#KvScan" class="headerlink" title="KvScan"></a>KvScan</h3><p>KvScan就是从<code>startKey</code>开始遍历，我们主要需要实现一个<code>Scanner</code>。流程如下：</p>
+<h3 id="Lab4c"><a href="#Lab4c" class="headerlink" title="Lab4c"></a>Lab4c</h3><p>这里是实现在2pc的时候需要查询状态或者处理遗留信息等的一些操作,和<code>Tikv</code>一致。</p>
+<h4 id="KvScan"><a href="#KvScan" class="headerlink" title="KvScan"></a>KvScan</h4><p>KvScan就是从<code>startKey</code>开始遍历，我们主要需要实现一个<code>Scanner</code>。流程如下：</p>
 <ul>
 <li>创建基于<code>CfWrite</code>的<code>iterator</code>。</li>
 <li><code>seek</code>到<code>startKey</code>。</li>
@@ -761,7 +761,7 @@ CheckKeyInRegion<span aria-hidden="true" class="line-numbers-rows"><span></span>
 <li>如果以上条件满足，则成功取到一个新的<code>k-v pairs</code></li>
 <li>在<code>KvScan</code>上层需要判断<code>value</code>是否为空，因为可能是删除或者<code>rollback</code>的write。</li>
 </ul>
-<h3 id="KvCheckTxnStatus"><a href="#KvCheckTxnStatus" class="headerlink" title="KvCheckTxnStatus"></a>KvCheckTxnStatus</h3><p>检查事务状态用的，根据此处检查的状态，判断<code>percolator</code>的进度，流程如下:</p>
+<h4 id="KvCheckTxnStatus"><a href="#KvCheckTxnStatus" class="headerlink" title="KvCheckTxnStatus"></a>KvCheckTxnStatus</h4><p>检查事务状态用的，根据此处检查的状态，判断<code>percolator</code>的进度，流程如下:</p>
 <ul>
 <li>获取<code>PrimaryKey</code>的<code>write</code></li>
 <li>如果<code>write</code>存在，有以下两种情况<ul>
@@ -775,7 +775,7 @@ CheckKeyInRegion<span aria-hidden="true" class="line-numbers-rows"><span></span>
 </ul>
 </li>
 </ul>
-<h3 id="KvBatchRollback"><a href="#KvBatchRollback" class="headerlink" title="KvBatchRollback"></a>KvBatchRollback</h3><p>Helper函数，用于事务的回滚。流程如下:</p>
+<h4 id="KvBatchRollback"><a href="#KvBatchRollback" class="headerlink" title="KvBatchRollback"></a>KvBatchRollback</h4><p>Helper函数，用于事务的回滚。流程如下:</p>
 <ul>
 <li>遍历所有需要回滚的key，对于每个key操作</li>
 <li>获取该key的<code>write</code>，如果<code>write</code>不为空<ul>
@@ -793,7 +793,7 @@ CheckKeyInRegion<span aria-hidden="true" class="line-numbers-rows"><span></span>
 </ul>
 </li>
 </ul>
-<h3 id="KvResolveLock"><a href="#KvResolveLock" class="headerlink" title="KvResolveLock"></a>KvResolveLock</h3><p><code>percolator</code>执行过程中<code>failed</code>掉时，<code>lock</code>会被留下，由于<code>percolator</code>的锁会阻塞其他事务，所以这些锁并且被清理。<br>和<code>percolator</code>论文的伪代码不同，<code>tikv</code>会使用<code>lazy</code>的方式以及<code>GC</code>的方式处理遗留的锁。也就是如果碰到被锁阻塞，可能会使用<code>KvResolveLock</code>,（当然<code>Tinykv</code>需要实现<code>lazy</code>的锁清理方式)。同时<code>GC</code>可能会调用该函数动态清理。流程如下：</p>
+<h4 id="KvResolveLock"><a href="#KvResolveLock" class="headerlink" title="KvResolveLock"></a>KvResolveLock</h4><p><code>percolator</code>执行过程中<code>failed</code>掉时，<code>lock</code>会被留下，由于<code>percolator</code>的锁会阻塞其他事务，所以这些锁并且被清理。<br>和<code>percolator</code>论文的伪代码不同，<code>tikv</code>会使用<code>lazy</code>的方式以及<code>GC</code>的方式处理遗留的锁。也就是如果碰到被锁阻塞，可能会使用<code>KvResolveLock</code>,（当然<code>Tinykv</code>需要实现<code>lazy</code>的锁清理方式)。同时<code>GC</code>可能会调用该函数动态清理。流程如下：</p>
 <ul>
 <li>在<code>CfLock</code>上创建迭代器，并且迭代处理<code>lock</code></li>
 <li>对于每个lock，如果解析得到<code>ts</code>是当前事务的ts，那么就加入到<code>Keys</code>中</li>
