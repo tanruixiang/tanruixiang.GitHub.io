@@ -1,0 +1,1103 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+
+
+<head>
+    <meta charset="utf-8">
+    <meta name="keywords" content="CS 144, Hexo">
+    <meta name="description" content="总结CS 144的Lab总体还是比较有意思的，Lab的总体目标就是自己实现一个TCP，在实现的过程中会加深对TCP的理解，特别是对TCP状态机的理解。并且Lab的测试应该算是比较强的，许多问题都会在Lab4的时候暴露出来总体完成之后把玩自己">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="renderer" content="webkit|ie-stand|ie-comp">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="referrer" content="no-referrer-when-downgrade">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+
+
+    <title>CS 144 | Hexo</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    
+
+
+    <!-- bg-cover style     -->
+
+
+
+<link rel="stylesheet" type="text/css" href="/libs/awesome/css/all.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/materialize/materialize.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/aos/aos.css">
+<link rel="stylesheet" type="text/css" href="/libs/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="/libs/lightGallery/css/lightgallery.min.css">
+<link rel="stylesheet" type="text/css" href="/css/matery.css">
+<link rel="stylesheet" type="text/css" href="/css/my.css">
+<link rel="stylesheet" type="text/css" href="/css/dark.css" media="none" onload="if(media!='all')media='all'">
+
+
+
+
+    <link rel="stylesheet" href="/libs/tocbot/tocbot.css">
+    <link rel="stylesheet" href="/css/post.css">
+
+
+
+
+    
+
+
+
+    <script src="/libs/jquery/jquery-3.6.0.min.js"></script>
+
+<meta name="generator" content="Hexo 6.3.0"></head>
+
+
+<body>
+    <header class="navbar-fixed">
+    <nav id="headNav" class="bg-color nav-transparent">
+        <div id="navContainer" class="nav-wrapper container">
+            <div class="brand-logo">
+                <a href="/" class="waves-effect waves-light">
+                    
+                    <img src="/medias/logo.png" class="logo-img" alt="LOGO">
+                    
+                    <span class="logo-span">Hexo</span>
+                </a>
+            </div>
+            
+
+<a href="#" data-target="mobile-nav" class="sidenav-trigger button-collapse"><i class="fas fa-bars"></i></a>
+<ul class="right nav-menu">
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/" class="waves-effect waves-light">
+      
+      <i class="fas fa-home" style="zoom: 0.6;"></i>
+      
+      <span>首页</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/tags" class="waves-effect waves-light">
+      
+      <i class="fas fa-tags" style="zoom: 0.6;"></i>
+      
+      <span>标签</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/categories" class="waves-effect waves-light">
+      
+      <i class="fas fa-bookmark" style="zoom: 0.6;"></i>
+      
+      <span>分类</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/archives" class="waves-effect waves-light">
+      
+      <i class="fas fa-archive" style="zoom: 0.6;"></i>
+      
+      <span>归档</span>
+    </a>
+    
+  </li>
+  
+  <li class="hide-on-med-and-down nav-item">
+    
+    <a href="/about" class="waves-effect waves-light">
+      
+      <i class="fas fa-user-circle" style="zoom: 0.6;"></i>
+      
+      <span>关于</span>
+    </a>
+    
+  </li>
+  
+  <li>
+    <a href="#searchModal" class="modal-trigger waves-effect waves-light">
+      <i id="searchIcon" class="fas fa-search" title="搜索" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+  <li>
+    <a href="javascript:;" class="waves-effect waves-light" onclick="switchNightMode()" title="深色/浅色模式" >
+      <i id="sum-moon-icon" class="fas fa-sun" style="zoom: 0.85;"></i>
+    </a>
+  </li>
+</ul>
+
+
+<div id="mobile-nav" class="side-nav sidenav">
+
+    <div class="mobile-head bg-color">
+        
+        <img src="/medias/logo.png" class="logo-img circle responsive-img">
+        
+        <div class="logo-name">Hexo</div>
+        <div class="logo-desc">
+            
+            Never really desperate, only the lost of the soul.
+            
+        </div>
+    </div>
+
+    <ul class="menu-list mobile-menu-list">
+        
+        <li class="m-nav-item">
+	  
+		<a href="/" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-home"></i>
+			
+			首页
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/tags" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-tags"></i>
+			
+			标签
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/categories" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-bookmark"></i>
+			
+			分类
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/archives" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-archive"></i>
+			
+			归档
+		</a>
+          
+        </li>
+        
+        <li class="m-nav-item">
+	  
+		<a href="/about" class="waves-effect waves-light">
+			
+			    <i class="fa-fw fas fa-user-circle"></i>
+			
+			关于
+		</a>
+          
+        </li>
+        
+        
+        <li><div class="divider"></div></li>
+        <li>
+            <a href="https://github.com/blinkfox/hexo-theme-matery" class="waves-effect waves-light" target="_blank">
+                <i class="fab fa-github-square fa-fw"></i>Fork Me
+            </a>
+        </li>
+        
+    </ul>
+</div>
+
+
+        </div>
+
+        
+            <style>
+    .nav-transparent .github-corner {
+        display: none !important;
+    }
+
+    .github-corner {
+        position: absolute;
+        z-index: 10;
+        top: 0;
+        right: 0;
+        border: 0;
+        transform: scale(1.1);
+    }
+
+    .github-corner svg {
+        color: #0f9d58;
+        fill: #fff;
+        height: 64px;
+        width: 64px;
+    }
+
+    .github-corner:hover .octo-arm {
+        animation: a 0.56s ease-in-out;
+    }
+
+    .github-corner .octo-arm {
+        animation: none;
+    }
+
+    @keyframes a {
+        0%,
+        to {
+            transform: rotate(0);
+        }
+        20%,
+        60% {
+            transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+            transform: rotate(10deg);
+        }
+    }
+</style>
+
+<a href="https://github.com/blinkfox/hexo-theme-matery" class="github-corner tooltipped hide-on-med-and-down" target="_blank"
+   data-tooltip="Fork Me" data-position="left" data-delay="50">
+    <svg viewBox="0 0 250 250" aria-hidden="true">
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+              fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path>
+        <path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+              fill="currentColor" class="octo-body"></path>
+    </svg>
+</a>
+        
+    </nav>
+
+</header>
+
+    
+
+
+
+<div class="bg-cover pd-header post-cover" style="background-image: url('/medias/featureimages/17.jpg')">
+    <div class="container" style="right: 0px;left: 0px;">
+        <div class="row">
+            <div class="col s12 m12 l12">
+                <div class="brand">
+                    <h1 class="description center-align post-title">CS 144</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<main class="post-container content">
+
+    
+    <div class="row">
+    <div id="main-content" class="col s12 m12 l9">
+        <!-- 文章内容详情 -->
+<div id="artDetail">
+    <div class="card">
+        <div class="card-content article-info">
+            <div class="row tag-cate">
+                <div class="col s7">
+                    
+                    <div class="article-tag">
+                        
+                            <a href="/tags/cs144/">
+                                <span class="chip bg-color">cs144</span>
+                            </a>
+                        
+                    </div>
+                    
+                </div>
+                <div class="col s5 right-align">
+                    
+                </div>
+            </div>
+
+            <div class="post-info">
+                
+                <div class="post-date info-break-policy">
+                    <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
+                    2023-02-13
+                </div>
+                
+
+                
+
+                
+
+                
+
+                
+            </div>
+        </div>
+        <hr class="clearfix">
+
+        
+        <!-- 是否加载使用自带的 prismjs. -->
+        <link rel="stylesheet" href="/libs/prism/prism.min.css">
+        
+
+        
+
+        <div class="card-content article-card-content">
+            <div id="articleContent">
+                <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>CS 144的Lab总体还是比较有意思的，Lab的总体目标就是自己实现一个TCP，在实现的过程中会加深对TCP的理解，特别是对TCP状态机的理解。并且Lab的测试应该算是比较强的，许多问题都会在Lab4的时候暴露出来总体完成之后把玩自己写的小玩具也比较有成就感。</p>
+<p>注：本文按照公开课一贯要求仅讨论细节。</p>
+<h2 id="Lab0-TCPSocket"><a href="#Lab0-TCPSocket" class="headerlink" title="Lab0 TCPSocket"></a>Lab0 TCPSocket</h2><p>Lab0比较简单。第一个是调用系统已经有的<code>TCPSocket</code>接口获取一个Web页面。这其实也就是后面几个lab的目标:自己实现一个TCP来替换这个操作系统已经支持的接口。<br>第二个是实现在内存中可靠的比特流，其实就是维护一个双端队列，根据需求返回和修改相应的数据和元数据，是TCP的最基础的组件。</p>
+<h2 id="Lab1-StreamReassembler"><a href="#Lab1-StreamReassembler" class="headerlink" title="Lab1 StreamReassembler"></a>Lab1 StreamReassembler</h2><p>Lab1 是实现一个<code>StreamReassembler</code>，具体来说就是对于收到的包把有序部分输入进Lab0中我们实现的比特流队列中，并且维护乱序的数据。<br>这里实现的方式十分多样,我采用的是使用一个<code>std::map&lt;size_t,std::string&gt;</code>维护从index到数据的映射，由于<code>std::map</code>是有序的,所有每次如果有新的数据进来的时候就可以用<code>log</code>的复杂度找到相邻的数据段就行合并(当然也可以偷懒直接遍历一遍进行合并）。<br>这里有几个需要注意的点：</p>
+<ul>
+<li>需要对空的数据进行处理</li>
+<li>收到带有eof标记的段的时候并不是整个比特流结束的时候，例如极端乱序情况下可能第一个就收到最后一个带有eof标记的数据段。需要接收到所有的段之后再关闭流。</li>
+<li>需要注意<code>_capacity</code>，对于在接收窗口外的数据段需要截断(这个有可能到Lab4才发现有问题)</li>
+</ul>
+<h2 id="Lab2-TCPReceiver"><a href="#Lab2-TCPReceiver" class="headerlink" title="Lab2 TCPReceiver"></a>Lab2 TCPReceiver</h2><p>Lab2 是实现<code>TCPReceiver</code>，也就是接收流的实现。<br>首先需要实现的是<code>各种下标系统之前的转换</code>。这里分了三种下标系统，分别是seqno(32位的TCP序列号)、absolute seqno(64位的TCP序列号，由于上升到了64位并且从0开始，所以不会存在mod $2^{32}$的情况下的绕回情况）、stream index (64位的数据段流下标，这里和asboulte seqno的唯一不同就是不包括SYN和FIN)。<br>需要实现两个方法，分别是:</p>
+<ul>
+<li><code>wrap</code>:将absolute seqno 转换成seqno，非常简单，只需要加isn后mod $2^{32}$就行了。<br><code>unwrap</code>:将seqno转换成absolute seqno。由于seqno在mod $2^{32}$的情况下可以一个值可以转换成多个不同的absolute seqno，所以我们只取离参数checkpoint最近的那个作为结果。也就是求$seqno - isn + n * 2^{32}$ 离 $checkpoint$最近的结果。可以通过前面的式子推出第一个大于或者小于等于的n取值，然后取离checkpoint最近的即可。</li>
+</ul>
+<p>然后需要实现的是<code>TCPReceiver</code>类。主要需要实现的就是<code>segment_received</code>方法，也就是接收一个数据报的方法。需要根据收到数据报的<code>syn和fin</code>记录相关的状态。需要依赖于刚刚我们对于<code>*wrap</code>的实现计算出<code>stream的index</code>，然后调用我们在Lab1中的<code>StreamReassembler</code>实现，组装或维护有序或无序数据。</p>
+<h2 id="Lab3-TCPSender"><a href="#Lab3-TCPSender" class="headerlink" title="Lab3 TCPSender"></a>Lab3 TCPSender</h2><p>Lab3 主要实现的就是<code>TCPSender</code>,它需要做的工作如下:</p>
+<ul>
+<li>把需要发送的字节流打包成数据段发送给对端。</li>
+<li>根据<code>ack</code>和<code>windows_size</code>调整自己的发送窗口，对于已经被ack的段从窗口中移除，更新自己的<code>windows_size</code>,并且尽可能多地把需要发送的字节流打包成数据段，以填满发送窗口。</li>
+<li>超时重传机制，如果一段时间后等待ack的数据段仍然没有任何一个被确认，那么就需要进行重传，并且倍增超时时间上限。</li>
+</ul>
+<p>主要需要实现的函数有:</p>
+<ul>
+<li><code>fill_window</code>：发送窗口填充函数,用于从字节流从取出相应字节打包成数据段填满发送窗口。<ul>
+<li>在<code>windows_size</code>有可用值的情况下，不断地从输入流中获取字节打包成数据段。这里注意一个数据段占用的序列号最多为<code>TCPConfig::MAX_PAYLOAD_SIZE</code>，注意<code>syn</code>和<code>fin</code>被设置的情况下也会占用序列号。</li>
+<li>第一个包一定带有<code>syn</code>，最后一个一定带有<code>fin</code>，所以需要一些额外的变量记录是否发送了第一个和最后一个包。</li>
+<li>还需要注意的是，如果<code>_window_size</code>为0的时候也需要发送最小大小为1的数据段，即使被拒绝也会收到相应的ack，从而更新<code>_window_size</code>。否则可能会出现接收端已发送ack，在等待收新的包，发送端在等待ack，但这个ack丢失造成死锁局面。</li>
+</ul>
+</li>
+<li><code>ack_received</code>:根据传入的<code>ack</code>和<code>window_size</code>，更新已经收到的包的情况，同时更新window_size大小。</li>
+<li><code>tick</code> 计时函数<ul>
+<li>用于计时，可能会触发超时重传。当距离上一次收到能够ack当前<code>已发送未被确认包</code>超过一个超时时间后，需要超时重传序列号最小的包。</li>
+<li>如果此时<code>windows_size</code>不为0，需要把超时时间翻倍(为0的时候不需要,因为不为0的时候还超时，说明此时接收端处理速度大于网络io速度，可以看成网络拥堵，为了避免更加拥堵需要将超时时间加倍)</li>
+<li>每次超时重传以及收到可以确认未被确认的数据段的ack时，都会重置计时器，并且把超时时间设置回初始值。</li>
+</ul>
+</li>
+</ul>
+<h2 id="Lab4"><a href="#Lab4" class="headerlink" title="Lab4"></a>Lab4</h2><p>Lab4 是最难的一部分，在这里会发现前面Lab的不足(我前面每一个都在这里发现了问题)，这里的测试用例也比较完成。<br>这一个部分是实现<code>TCPConnection</code>,也就是把<code>TCPSender</code>和<code>TCPReceiver</code>结合起来,实现完整的TCP协议。<br>将这两者结合，本质上就是实现TCP有限状态机。如果能够把<code>TCPSender</code>和<code>TCPReceiver</code>准确得对应到TCP的有限状态机上，这个部分就很好解决了。</p>
+<p><img src="/tcp_fsm.png"><br>状态图如上所示，蓝色为server的状态变化路径，褐色为客户端的状态变化路径。</p>
+<p>在<code>segment_received</code>函数收到数据包并且传给<code>sender</code>和<code>receiver</code>,即可通过这两个的状态来对应到图上的状态。</p>
+<p>具体状态可以参考<code>tcp_state.cc</code>里是如何判断状态的,<code>TCPConnection</code>只要严格遵守有限状态机进行转移，就没有问题。</p>
+<pre class="line-numbers language-none"><code class="language-none">TCPState::TCPState(const TCPState::State state) &#123;
+    switch (state) &#123;
+        case TCPState::State::LISTEN:
+            _receiver &#x3D; TCPReceiverStateSummary::LISTEN;
+            _sender &#x3D; TCPSenderStateSummary::CLOSED;
+            break;
+        case TCPState::State::SYN_RCVD:
+            _receiver &#x3D; TCPReceiverStateSummary::SYN_RECV;
+            _sender &#x3D; TCPSenderStateSummary::SYN_SENT;
+            break;
+        case TCPState::State::SYN_SENT:
+            _receiver &#x3D; TCPReceiverStateSummary::LISTEN;
+            _sender &#x3D; TCPSenderStateSummary::SYN_SENT;
+            break;
+        case TCPState::State::ESTABLISHED:
+            _receiver &#x3D; TCPReceiverStateSummary::SYN_RECV;
+            _sender &#x3D; TCPSenderStateSummary::SYN_ACKED;
+            break;
+        case TCPState::State::CLOSE_WAIT:
+            _receiver &#x3D; TCPReceiverStateSummary::FIN_RECV;
+            _sender &#x3D; TCPSenderStateSummary::SYN_ACKED;
+            _linger_after_streams_finish &#x3D; false;
+            break;
+        case TCPState::State::LAST_ACK:
+            _receiver &#x3D; TCPReceiverStateSummary::FIN_RECV;
+            _sender &#x3D; TCPSenderStateSummary::FIN_SENT;
+            _linger_after_streams_finish &#x3D; false;
+            break;
+        case TCPState::State::CLOSING:
+            _receiver &#x3D; TCPReceiverStateSummary::FIN_RECV;
+            _sender &#x3D; TCPSenderStateSummary::FIN_SENT;
+            break;
+        case TCPState::State::FIN_WAIT_1:
+            _receiver &#x3D; TCPReceiverStateSummary::SYN_RECV;
+            _sender &#x3D; TCPSenderStateSummary::FIN_SENT;
+            break;
+        case TCPState::State::FIN_WAIT_2:
+            _receiver &#x3D; TCPReceiverStateSummary::SYN_RECV;
+            _sender &#x3D; TCPSenderStateSummary::FIN_ACKED;
+            break;
+        case TCPState::State::TIME_WAIT:
+            _receiver &#x3D; TCPReceiverStateSummary::FIN_RECV;
+            _sender &#x3D; TCPSenderStateSummary::FIN_ACKED;
+            break;
+        case TCPState::State::RESET:
+            _receiver &#x3D; TCPReceiverStateSummary::ERROR;
+            _sender &#x3D; TCPSenderStateSummary::ERROR;
+            _linger_after_streams_finish &#x3D; false;
+            _active &#x3D; false;
+            break;
+        case TCPState::State::CLOSED:
+            _receiver &#x3D; TCPReceiverStateSummary::FIN_RECV;
+            _sender &#x3D; TCPSenderStateSummary::FIN_ACKED;
+            _linger_after_streams_finish &#x3D; false;
+            _active &#x3D; false;
+            break;
+    &#125;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>可以看到，有限状态机的状态就是由<code>TCPSender</code>和<code>TCPReceiver</code>和一个可以分辨在四步握手过程中谁是先发起断开请求一方的变量<code>_linger_after_streams_finish</code>进行确认的。</p>
+<p>要注意的点如下:</p>
+<ul>
+<li>每次收到占用序列号空间的包都需要发送ack确认。</li>
+<li>如果收到序列号为0的包，并且该包回复的<code>ackno</code>刚好是目前收到的包的序列号+1，说明此时有可能对端没有更新窗口大小，此时需要发一个空的包带上ack回复对端，更新对端的窗口大小</li>
+<li><code>_linger_after_streams_finish</code>的设置，从<code>ESTABLISH</code>转移成<code>CLOSE WAIT</code>的时候会进行设置，该变量的来由在下文详细描述了。</li>
+<li>收到<code>rst</code>包的时候，需要把直接把连接关闭。</li>
+<li><code>_linger_after_streams_finish</code>设置为false，这可以标识当前端是被动关闭链接的一端，而主动关闭的一方<code>_linger_after_streams_finish</code>一直是<code>true</code>。</li>
+<li>析构的时候没有正常关闭需要把入站出站流设置为错误，并且向对端发送rst。</li>
+</ul>
+<p>对于连接关闭有两种情况：</p>
+<ul>
+<li>第一种是非正常关闭，也就是收到或发送rst的关闭，每个流都会以error的状态关闭</li>
+<li>第二种是正常关闭，这就涉及四步挥手的<code>TIME WAIT 和 LAST ACK 向 CLOSE 状态转移的问题了</code>。<ul>
+<li>本地TCP正常关闭需要满足以下条件:<ul>
+<li>入站流已经完成接收任务并且结束了</li>
+<li>出站流已经完成发送任务并且结束了</li>
+<li>出站流的所有包都已经被对等方完全确认了</li>
+<li>本地TCP方确信<strong>对等方</strong>已经满足了以上三个要求</li>
+</ul>
+</li>
+<li>有两种情况:<ul>
+<li>本地TCP在等待一段时间后关闭(也就是TIME WAIT等待的那2MSL）。对于条件1，本地TCP已经没有东西可以发送了，已经给对等方发送了FIN。对于条件2，已经收到了对等方的FIN。对于条件3，由于TCP不会ACK一个序列号为空的ACK,所以只能依靠等待一段时间来满足该条件。也就是说如果等待一段时间仍然没有收到对等方发送的消息，就可以认为已经满足条件3了，那么就可以关闭本地的TCP连接了。(该情况是 TIME WAIT -&gt; CLOSE)</li>
+<li>第二种情况是本地TCP可以完全确信对等方满足条件1到3,条件1和2都可以以FIN为标志满足，条件3满足是由于对等方是先发起FIN结束流的，所以本地收到了FIN并且发出了最后的ack也就意味着可以确认是否满足条件3了。这种情况下就可以直接关闭。(该情况是LAST ACK -&gt; CLOSE)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>回到代码里，由于<code>LAST ACK</code>和<code>TIME WAIT</code>的sender和receiver的状态都分别是<code>FIN_RECV</code>和<code>FIN_ACKED</code>，这个时候就需要一个变量来分辨他们，从而对应到上面的两种情况做出不同行为，本实验中该变量就是<code>_linger_after_streams_finish</code>,在状态转移到<code>CLOSE WAIT</code>的时候记录一下即可。</p>
+<h2 id="Lab5-ARP"><a href="#Lab5-ARP" class="headerlink" title="Lab5 ARP"></a>Lab5 ARP</h2><p>本节需要实现ARP协议,ARP协议属于网络层协议。用于IP地址到MAC地址的映射,可以理解成IP地址是个逻辑地址，而发送IP报文需要拿到物理地址。</p>
+<p>为了实现ARP协议，我们在内部维护了一个表，用于IP到MAC地址映射，而表的更新机制也很简单，当我们需要发送一个报文却在表中找不到对应的MAC地址时，就会把向局域网发出广播报文，报文中附带了需要询问的IP地址和自身的IP以及MAC地址，当对应IP地址的那个节点收到了这个报文时，就会把自己的MAC地址发送回来，这个时候本地就可以获得这个IP到MAC的映射，并且缓存起来以供下一次使用。</p>
+<p>具体需要实现的接口和注意事项如下:</p>
+<ul>
+<li><code>end_datagram(const InternetDatagram &amp;dgram, const Address &amp;next_hop)</code>:发送报文到<code>next_hop</code>,会碰到两种情况:<ul>
+<li>能够找到对应的MAC地址，那么直接发送即可。</li>
+<li>找不到对应的MAC地址，如果在5秒内对同一个IP地址已经发送过ARP广播请求包了，那么就什么也不干，否则发送一个ARP广播包，用于请求该ip地址的mac地址。这里维护一下每个ip上一次发送时间即可。</li>
+</ul>
+</li>
+<li><code>NetworkInterface::recv_frame(const EthernetFrame &amp;frame)</code>:接受一个报文，如果是IPV4报文那么直接解析它，如果是ARP报文解析后首先确认该报文的目的ip地址是本地ip地址，然后缓存该MAC地址，如果是<code>OPCODE_REQUEST</code>的请求报文，那么把自己的ip地址和MAC地址发送给请求方。最后需要看是否有待发送的数据报在等待这个新缓存的MAC地址。</li>
+<li><code>tick</code>函数:<ul>
+<li>超过30秒的ARP地址缓存需要清除</li>
+<li>超过5秒还未拿到MAC地址的ip需要再一次请求。</li>
+</ul>
+</li>
+</ul>
+<h2 id="Lab6-Router"><a href="#Lab6-Router" class="headerlink" title="Lab6 Router"></a>Lab6 Router</h2><p>实现路由匹配算法，这里的路由算法不涉及OSPF或者RIP等动态路由算法，只涉及基于人工路由表的匹配算法，匹配机制是最大前缀匹配。对于需要发送的目的ip地址，在所有网络接口中，寻找具有最长前缀匹配的网络接口，将数据报发送给该接口。<br>需要注意：</p>
+<ul>
+<li>维护数据报的ttl</li>
+<li>如果网络接口的next_hop为空，说明请求的IP是直接和网络相连的，直接发送数据报中的IP即可，否则发送到下一跳的网络接口IP地址中。</li>
+</ul>
+<h3 id="Lab7"><a href="#Lab7" class="headerlink" title="Lab7"></a>Lab7</h3><p>把玩自己的玩具，可以和别人的实现进行交互(当然也可以自己和自己玩)。</p>
+
+                
+            </div>
+            <hr/>
+
+            
+
+    <div class="reprint" id="reprint-statement">
+        
+            <div class="reprint__author">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-user">
+                        文章作者:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="/about" rel="external nofollow noreferrer">Ruixiang Tan</a>
+                </span>
+            </div>
+            <div class="reprint__type">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-link">
+                        文章链接:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    <a href="http://tanruixiang.GitHub.io/2023/02/13/Cs-144/">http://tanruixiang.GitHub.io/2023/02/13/Cs-144/</a>
+                </span>
+            </div>
+            <div class="reprint__notice">
+                <span class="reprint-meta" style="font-weight: bold;">
+                    <i class="fas fa-copyright">
+                        版权声明:
+                    </i>
+                </span>
+                <span class="reprint-info">
+                    本博客所有文章除特別声明外，均采用
+                    <a href="https://creativecommons.org/licenses/by/4.0/deed.zh" rel="external nofollow noreferrer" target="_blank">CC BY 4.0</a>
+                    许可协议。转载请注明来源
+                    <a href="/about" target="_blank">Ruixiang Tan</a>
+                    !
+                </span>
+            </div>
+        
+    </div>
+
+    <script async defer>
+      document.addEventListener("copy", function (e) {
+        let toastHTML = '<span>复制成功，请遵循本文的转载规则</span><button class="btn-flat toast-action" onclick="navToReprintStatement()" style="font-size: smaller">查看</a>';
+        M.toast({html: toastHTML})
+      });
+
+      function navToReprintStatement() {
+        $("html, body").animate({scrollTop: $("#reprint-statement").offset().top - 80}, 800);
+      }
+    </script>
+
+
+
+            <div class="tag_share" style="display: block;">
+                <div class="post-meta__tag-list" style="display: inline-block;">
+                    
+                        <div class="article-tag">
+                            
+                                <a href="/tags/cs144/">
+                                    <span class="chip bg-color">cs144</span>
+                                </a>
+                            
+                        </div>
+                    
+                </div>
+                <div class="post_share" style="zoom: 80%; width: fit-content; display: inline-block; float: right; margin: -0.15rem 0;">
+                    <link rel="stylesheet" type="text/css" href="/libs/share/css/share.min.css">
+<div id="article-share">
+
+    
+    <div class="social-share" data-sites="twitter,facebook,google,qq,qzone,wechat,weibo,douban,linkedin" data-wechat-qrcode-helper="<p>微信扫一扫即可分享！</p>"></div>
+    <script src="/libs/share/js/social-share.min.js"></script>
+    
+
+    
+
+</div>
+
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+<article id="prenext-posts" class="prev-next articles">
+    <div class="row article-row">
+        
+        <div class="article col s12 m6" data-aos="fade-up" data-aos="fade-up">
+            <div class="article-badge left-badge text-color">
+                <i class="far fa-dot-circle"></i>&nbsp;本篇
+            </div>
+            <div class="card">
+                <a href="/2023/02/13/Cs-144/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/17.jpg" class="responsive-img" alt="CS 144">
+                        
+                        <span class="card-title">CS 144</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-02-13
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-user fa-fw"></i>
+                            Ruixiang Tan
+                            
+                        </span>
+                    </div>
+                </div>
+
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/cs144/">
+                        <span class="chip bg-color">cs144</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+        
+        <div class="article col s12 m6" data-aos="fade-up">
+            <div class="article-badge right-badge text-color">
+                下一篇&nbsp;<i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="card">
+                <a href="/2022/12/19/An-Empirical-Evaluation-of-In-Memory-Multi-Version-Concurrency-Control/">
+                    <div class="card-image">
+                        
+                        
+                        <img src="/medias/featureimages/19.jpg" class="responsive-img" alt="An Empirical Evaluation of In-Memory Multi-Version Concurrency Control">
+                        
+                        <span class="card-title">An Empirical Evaluation of In-Memory Multi-Version Concurrency Control</span>
+                    </div>
+                </a>
+                <div class="card-content article-content">
+                    <div class="summary block-with-text">
+                        
+                            
+                        
+                    </div>
+                    <div class="publish-info">
+                            <span class="publish-date">
+                                <i class="far fa-clock fa-fw icon-date"></i>2022-12-19
+                            </span>
+                        <span class="publish-author">
+                            
+                            <i class="fas fa-user fa-fw"></i>
+                            Ruixiang Tan
+                            
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-action article-tags">
+                    
+                    <a href="/tags/Paper-Reading/">
+                        <span class="chip bg-color">Paper Reading</span>
+                    </a>
+                    
+                </div>
+                
+            </div>
+        </div>
+        
+    </div>
+</article>
+
+</div>
+
+
+
+<!-- 代码块功能依赖 -->
+<script type="text/javascript" src="/libs/codeBlock/codeBlockFuction.js"></script>
+
+
+  <!-- 是否加载使用自带的 prismjs. -->
+  <script type="text/javascript" src="/libs/prism/prism.min.js"></script>
+
+
+<!-- 代码语言 -->
+
+
+<!-- 代码块复制 -->
+
+<script type="text/javascript" src="/libs/codeBlock/codeCopy.js"></script>
+
+
+<!-- 代码块收缩 -->
+
+
+
+    </div>
+    <div id="toc-aside" class="expanded col l3 hide-on-med-and-down">
+        <div class="toc-widget card" style="background-color: white;">
+            <div class="toc-title"><i class="far fa-list-alt"></i>&nbsp;&nbsp;目录</div>
+            <div id="toc-content"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TOC 悬浮按钮. -->
+
+<div id="floating-toc-btn" class="hide-on-med-and-down">
+    <a class="btn-floating btn-large bg-color">
+        <i class="fas fa-list-ul"></i>
+    </a>
+</div>
+
+
+<script src="/libs/tocbot/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '#articleContent',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            collapseDepth: Number('0'),
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+
+        
+        /* 修复文章卡片 div 的宽度. */
+        let fixPostCardWidth = function (srcId, targetId) {
+            let srcDiv = $('#' + srcId);
+            if (srcDiv.length === 0) {
+                return;
+            }
+
+            let w = srcDiv.width();
+            if (w >= 450) {
+                w = w + 21;
+            } else if (w >= 350 && w < 450) {
+                w = w + 18;
+            } else if (w >= 300 && w < 350) {
+                w = w + 16;
+            } else {
+                w = w + 14;
+            }
+            $('#' + targetId).width(w);
+        };
+
+        // 切换TOC目录展开收缩的相关操作.
+        const expandedClass = 'expanded';
+        let $tocAside = $('#toc-aside');
+        let $mainContent = $('#main-content');
+        $('#floating-toc-btn .btn-floating').click(function () {
+            if ($tocAside.hasClass(expandedClass)) {
+                $tocAside.removeClass(expandedClass).hide();
+                $mainContent.removeClass('l9');
+            } else {
+                $tocAside.addClass(expandedClass).show();
+                $mainContent.addClass('l9');
+            }
+            fixPostCardWidth('artDetail', 'prenext-posts');
+        });
+        
+    });
+</script>
+
+    
+
+</main>
+
+
+
+
+    <footer class="page-footer bg-color">
+    
+
+    <div class="container row center-align"
+         style="margin-bottom: 0px !important;">
+        <div class="col s12 m8 l8 copy-right">
+            Copyright&nbsp;&copy;
+            
+                <span id="year">2022-2023</span>
+            
+            <a href="/about" target="_blank">Ruixiang Tan</a>
+            |&nbsp;Powered by&nbsp;<a href="https://hexo.io/" target="_blank">Hexo</a>
+            |&nbsp;Theme&nbsp;<a href="https://github.com/blinkfox/hexo-theme-matery" target="_blank">Matery</a>
+            <br>
+            
+            
+            
+            
+                <span id="busuanzi_container_site_pv">
+                &nbsp;|&nbsp;<i class="far fa-eye"></i>&nbsp;总访问量:&nbsp;
+                    <span id="busuanzi_value_site_pv" class="white-color"></span>
+            </span>
+            
+            
+                <span id="busuanzi_container_site_uv">
+                &nbsp;|&nbsp;<i class="fas fa-users"></i>&nbsp;总访问人数:&nbsp;
+                    <span id="busuanzi_value_site_uv" class="white-color"></span>
+            </span>
+            
+            <br>
+
+            <!-- 运行天数提醒. -->
+            
+            <br>
+            
+        </div>
+        <div class="col s12 m4 l4 social-link ">
+    <a href="https://github.com/tanruixiang" class="tooltipped" target="_blank" data-tooltip="访问我的GitHub" data-position="top" data-delay="50">
+        <i class="fab fa-github"></i>
+    </a>
+
+
+
+    <a href="mailto:819464715@qq.com" class="tooltipped" target="_blank" data-tooltip="邮件联系我" data-position="top" data-delay="50">
+        <i class="fas fa-envelope-open"></i>
+    </a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <a href="/atom.xml" class="tooltipped" target="_blank" data-tooltip="RSS 订阅" data-position="top" data-delay="50">
+        <i class="fas fa-rss"></i>
+    </a>
+
+</div>
+    </div>
+</footer>
+
+<div class="progress-bar"></div>
+
+
+    <!-- 搜索遮罩框 -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <div class="search-header">
+            <span class="title"><i class="fas fa-search"></i>&nbsp;&nbsp;搜索</span>
+            <input type="search" id="searchInput" name="s" placeholder="请输入搜索的关键字"
+                   class="search-input">
+        </div>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+$(function () {
+    var searchFunc = function (path, search_id, content_id) {
+        'use strict';
+        $.ajax({
+            url: path,
+            dataType: "xml",
+            success: function (xmlResponse) {
+                // get the contents from search data
+                var datas = $("entry", xmlResponse).map(function () {
+                    return {
+                        title: $("title", this).text(),
+                        content: $("content", this).text(),
+                        url: $("url", this).text()
+                    };
+                }).get();
+                var $input = document.getElementById(search_id);
+                var $resultContent = document.getElementById(content_id);
+                $input.addEventListener('input', function () {
+                    var str = '<ul class=\"search-result-list\">';
+                    var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+                    $resultContent.innerHTML = "";
+                    if (this.value.trim().length <= 0) {
+                        return;
+                    }
+                    // perform local searching
+                    datas.forEach(function (data) {
+                        var isMatch = true;
+                        var data_title = data.title.trim().toLowerCase();
+                        var data_content = data.content.trim().replace(/<[^>]+>/g, "").toLowerCase();
+                        var data_url = data.url;
+                        data_url = data_url.indexOf('/') === 0 ? data.url : '/' + data_url;
+                        var index_title = -1;
+                        var index_content = -1;
+                        var first_occur = -1;
+                        // only match artiles with not empty titles and contents
+                        if (data_title !== '' && data_content !== '') {
+                            keywords.forEach(function (keyword, i) {
+                                index_title = data_title.indexOf(keyword);
+                                index_content = data_content.indexOf(keyword);
+                                if (index_title < 0 && index_content < 0) {
+                                    isMatch = false;
+                                } else {
+                                    if (index_content < 0) {
+                                        index_content = 0;
+                                    }
+                                    if (i === 0) {
+                                        first_occur = index_content;
+                                    }
+                                }
+                            });
+                        }
+                        // show search results
+                        if (isMatch) {
+                            str += "<li><a href='" + data_url + "' class='search-result-title'>" + data_title + "</a>";
+                            var content = data.content.trim().replace(/<[^>]+>/g, "");
+                            if (first_occur >= 0) {
+                                // cut out 100 characters
+                                var start = first_occur - 20;
+                                var end = first_occur + 80;
+                                if (start < 0) {
+                                    start = 0;
+                                }
+                                if (start === 0) {
+                                    end = 100;
+                                }
+                                if (end > content.length) {
+                                    end = content.length;
+                                }
+                                var match_content = content.substr(start, end);
+                                // highlight all keywords
+                                keywords.forEach(function (keyword) {
+                                    var regS = new RegExp(keyword, "gi");
+                                    match_content = match_content.replace(regS, "<em class=\"search-keyword\">" + keyword + "</em>");
+                                });
+
+                                str += "<p class=\"search-result\">" + match_content + "...</p>"
+                            }
+                            str += "</li>";
+                        }
+                    });
+                    str += "</ul>";
+                    $resultContent.innerHTML = str;
+                });
+            }
+        });
+    };
+
+    searchFunc('/search.xml', 'searchInput', 'searchResult');
+});
+</script>
+
+    <!-- 白天和黑夜主题 -->
+<div class="stars-con">
+    <div id="stars"></div>
+    <div id="stars2"></div>
+    <div id="stars3"></div>  
+</div>
+
+<script>
+    function switchNightMode() {
+        $('<div class="Cuteen_DarkSky"><div class="Cuteen_DarkPlanet"></div></div>').appendTo($('body')),
+        setTimeout(function () {
+            $('body').hasClass('DarkMode') 
+            ? ($('body').removeClass('DarkMode'), localStorage.setItem('isDark', '0'), $('#sum-moon-icon').removeClass("fa-sun").addClass('fa-moon')) 
+            : ($('body').addClass('DarkMode'), localStorage.setItem('isDark', '1'), $('#sum-moon-icon').addClass("fa-sun").removeClass('fa-moon')),
+            
+            setTimeout(function () {
+            $('.Cuteen_DarkSky').fadeOut(1e3, function () {
+                $(this).remove()
+            })
+            }, 2e3)
+        })
+    }
+</script>
+
+    <!-- 回到顶部按钮 -->
+<div id="backTop" class="top-scroll">
+    <a class="btn-floating btn-large waves-effect waves-light" href="#!">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+</div>
+
+
+    <script src="/libs/materialize/materialize.min.js"></script>
+    <script src="/libs/masonry/masonry.pkgd.min.js"></script>
+    <script src="/libs/aos/aos.js"></script>
+    <script src="/libs/scrollprogress/scrollProgress.min.js"></script>
+    <script src="/libs/lightGallery/js/lightgallery-all.min.js"></script>
+    <script src="/js/matery.js"></script>
+
+    
+        <!-- <script src='https://unpkg.com/mermaid@latest/dist/mermaid.min.js'></script> -->
+        <script src='/libs/mermaid/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+    
+
+    
+
+    <!-- 雪花特效 -->
+    
+
+    <!-- 鼠标星星特效 -->
+    
+
+     
+        <script src="https://ssl.captcha.qq.com/TCaptcha.js"></script>
+        <script src="/libs/others/TencentCaptcha.js"></script>
+        <button id="TencentCaptcha" data-appid="xxxxxxxxxx" data-cbfn="callback" type="button" hidden></button>
+    
+
+    <!-- Baidu Analytics -->
+
+    <!-- Baidu Push -->
+
+<script>
+    (function () {
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        } else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+
+    
+    
+
+    
+
+    
+
+    <!--腾讯兔小巢-->
+    
+    
+
+    
+
+    
+
+    
+    <script src="/libs/instantpage/instantpage.js" type="module"></script>
+    
+
+</body>
+
+</html>
