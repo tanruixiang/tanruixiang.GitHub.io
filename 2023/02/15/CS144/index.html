@@ -317,8 +317,8 @@
                     
                     <div class="article-tag">
                         
-                            <a href="/tags/cs144/">
-                                <span class="chip bg-color">cs144</span>
+                            <a href="/tags/CS-144/">
+                                <span class="chip bg-color">CS 144</span>
                             </a>
                         
                     </div>
@@ -333,7 +333,7 @@
                 
                 <div class="post-date info-break-policy">
                     <i class="far fa-calendar-minus fa-fw"></i>发布日期:&nbsp;&nbsp;
-                    2023-02-13
+                    2023-02-15
                 </div>
                 
 
@@ -393,8 +393,10 @@
 </ul>
 </li>
 </ul>
-<h2 id="Lab4"><a href="#Lab4" class="headerlink" title="Lab4"></a>Lab4</h2><p>Lab4 是最难的一部分，在这里会发现前面Lab的不足(我前面每一个都在这里发现了问题)，这里的测试用例也比较完成。<br>这一个部分是实现<code>TCPConnection</code>,也就是把<code>TCPSender</code>和<code>TCPReceiver</code>结合起来,实现完整的TCP协议。<br>将这两者结合，本质上就是实现TCP有限状态机。如果能够把<code>TCPSender</code>和<code>TCPReceiver</code>准确得对应到TCP的有限状态机上，这个部分就很好解决了。</p>
-<p><img src="/tcp_fsm.png"><br>状态图如上所示，蓝色为server的状态变化路径，褐色为客户端的状态变化路径。</p>
+<h2 id="Lab4-TCPConnection"><a href="#Lab4-TCPConnection" class="headerlink" title="Lab4 TCPConnection"></a>Lab4 TCPConnection</h2><p>Lab4 是最难的一部分，在这里会发现前面Lab的不足(我前面每一个Lab都在这里发现了问题QAQ)，这里的测试用例也比较完成。<br>这一个部分是实现<code>TCPConnection</code>,也就是把<code>TCPSender</code>和<code>TCPReceiver</code>结合起来,实现完整的TCP协议。<br>将这两者结合，本质上就是实现TCP有限状态机。如果能够把<code>TCPSender</code>和<code>TCPReceiver</code>准确得对应到TCP的有限状态机上，这个部分就很好解决了。</p>
+<!-- ![TCP_FSM](/source/_posts/CS144/tcp_fsm.png) -->
+<img src="/2023/02/15/CS144/tcp_fsm.png" class="">
+<p>状态图如上所示，蓝色为server的状态变化路径，褐色为客户端的状态变化路径。</p>
 <p>在<code>segment_received</code>函数收到数据包并且传给<code>sender</code>和<code>receiver</code>,即可通过这两个的状态来对应到图上的状态。</p>
 <p>具体状态可以参考<code>tcp_state.cc</code>里是如何判断状态的,<code>TCPConnection</code>只要严格遵守有限状态机进行转移，就没有问题。</p>
 <pre class="line-numbers language-none"><code class="language-none">TCPState::TCPState(const TCPState::State state) &#123;
@@ -502,12 +504,12 @@
 </ul>
 </li>
 </ul>
-<h2 id="Lab6-Router"><a href="#Lab6-Router" class="headerlink" title="Lab6 Router"></a>Lab6 Router</h2><p>实现路由匹配算法，这里的路由算法不涉及OSPF或者RIP等动态路由算法，只涉及基于人工路由表的匹配算法，匹配机制是最大前缀匹配。对于需要发送的目的ip地址，在所有网络接口中，寻找具有最长前缀匹配的网络接口，将数据报发送给该接口。<br>需要注意：</p>
+<h2 id="Lab6-Router"><a href="#Lab6-Router" class="headerlink" title="Lab6 Router"></a>Lab6 Router</h2><p>实现路由匹配算法，这里的路由算法不涉及OSPF或者RIP等动态路由算法，只涉及基于人工路由表的匹配算法，匹配机制使用的策略是最大前缀匹配。对于需要发送的目的ip地址，在所有网络接口中，寻找具有最长前缀匹配的网络接口，将数据报发送给该接口。<br>需要注意：</p>
 <ul>
-<li>维护数据报的ttl</li>
-<li>如果网络接口的next_hop为空，说明请求的IP是直接和网络相连的，直接发送数据报中的IP即可，否则发送到下一跳的网络接口IP地址中。</li>
+<li>维护数据报的<code>ttl</code></li>
+<li>如果网络接口的<code>next_hop</code>为空，说明请求的IP是直接和网络相连的，直接发送数据报中的IP即可，否则发送到下一跳的网络接口IP地址中。</li>
 </ul>
-<h3 id="Lab7"><a href="#Lab7" class="headerlink" title="Lab7"></a>Lab7</h3><p>把玩自己的玩具，可以和别人的实现进行交互(当然也可以自己和自己玩)。</p>
+<h2 id="Lab7-Play"><a href="#Lab7-Play" class="headerlink" title="Lab7  Play"></a>Lab7  Play</h2><p>把玩自己的玩具，可以和别人的实现进行交互(当然也可以自己和自己玩)。</p>
 
                 
             </div>
@@ -534,7 +536,7 @@
                     </i>
                 </span>
                 <span class="reprint-info">
-                    <a href="http://tanruixiang.GitHub.io/2023/02/13/Cs-144/">http://tanruixiang.GitHub.io/2023/02/13/Cs-144/</a>
+                    <a href="http://tanruixiang.GitHub.io/2023/02/15/CS144/">http://tanruixiang.GitHub.io/2023/02/15/CS144/</a>
                 </span>
             </div>
             <div class="reprint__notice">
@@ -572,8 +574,8 @@
                     
                         <div class="article-tag">
                             
-                                <a href="/tags/cs144/">
-                                    <span class="chip bg-color">cs144</span>
+                                <a href="/tags/CS-144/">
+                                    <span class="chip bg-color">CS 144</span>
                                 </a>
                             
                         </div>
@@ -624,7 +626,7 @@
                 <i class="far fa-dot-circle"></i>&nbsp;本篇
             </div>
             <div class="card">
-                <a href="/2023/02/13/Cs-144/">
+                <a href="/2023/02/15/CS144/">
                     <div class="card-image">
                         
                         
@@ -641,7 +643,7 @@
                     </div>
                     <div class="publish-info">
                             <span class="publish-date">
-                                <i class="far fa-clock fa-fw icon-date"></i>2023-02-13
+                                <i class="far fa-clock fa-fw icon-date"></i>2023-02-15
                             </span>
                         <span class="publish-author">
                             
@@ -655,8 +657,8 @@
                 
                 <div class="card-action article-tags">
                     
-                    <a href="/tags/cs144/">
-                        <span class="chip bg-color">cs144</span>
+                    <a href="/tags/CS-144/">
+                        <span class="chip bg-color">CS 144</span>
                     </a>
                     
                 </div>
